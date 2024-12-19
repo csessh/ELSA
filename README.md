@@ -34,5 +34,15 @@ PONG
 
 ## Server 
 
+To get the server started, run the following command:
+
+``` bash
+$ docker compose up
+```
+
+`compose.yaml` defines two containers: `ElsaServer` and `Redis`
+
+`ElsaServer` is a FastAPI server exposed to port `8000` on `localhost`.
+`Redis` is mapped to `6379`.
 
 ## Client simulation
