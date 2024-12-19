@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  server:
+    build:
+      dockerfile: Dockerfile
+    container_name: "ElsaServer"
+    ports:
+      - 8000:8000
+  redis:
+    image: "redis/redis-stack:latest"

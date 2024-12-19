@@ -1,0 +1,15 @@
+.editorconfig
+.pre-commit-config.yaml
+.python-version
+.pytest_cache
+.coverage
+.gitignore
+.github
+*.md
+.ruff_cache
+.venv
+.dockerignore
+Dockerfile
+docker-compose.yaml
+README.md
+__pycache__

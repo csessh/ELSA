@@ -1,5 +1,5 @@
 [project]
-name = "elsa-demo"
+name = "elsa"
 version = "0.1.0"
 description = "Technical demo for ELSA (Sr. SWE position)"
 readme = "README.md"
@@ -9,6 +9,7 @@ dependencies = [
   "fastapi[standard]>=0.115.6",
   "locust>=2.32.4",
   "pre-commit>=4.0.1",
+  "redis>=5.2.1",
   "rich>=13.9.4",
   "ruff>=0.8.3",
   "websocket>=0.2.1",

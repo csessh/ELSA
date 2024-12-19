@@ -1,0 +1,20 @@
+line-length = 120
+target-version = "py313"
+
+exclude = [
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".mypy_cache",
+  ".pytype",
+  ".ruff_cache",
+  ".venv",
+  "__pypackages__",
+  "__pycache__",
+  "_build",
+  "build",
+  "dist",
+]
+
+lint.select = ["E", "W"]
+lint.ignore = []
