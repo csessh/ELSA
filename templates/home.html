@@ -1,0 +1,17 @@
+<button onclick="getScores()">Start simulation</button>
+<pre id="scoreboard"></pre>
+
+<script>
+    async function getScores() {
+        while(true) {
+            await fetch("/scores")
+            .then(res => res.json())
+            .then(data => {
+                var tag = document.getElementById("scoreboard")
+                tag.textContent = JSON.stringify(data, null, 2)
+            })
+
+            await new Promise(r => setTimeout(r, 100));
+        }
+    }
+</script>

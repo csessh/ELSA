@@ -1,14 +1,14 @@
-version: "3"
-
 services:
-  server:
+  elsa-scoreboard:
     build:
-      dockerfile: Dockerfile
-    container_name: ElsaServer
+      dockerfile: scoreboard.dockerfile 
+    container_name: scoreboard
     ports:
       - 8000:8000
+    network_mode: host
   redis:
     image: redis/redis-stack:latest
     container_name: redis
     ports:
       - 6379:6379
+    network_mode: host

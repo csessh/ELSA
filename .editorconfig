@@ -1,14 +1,6 @@
 root = true
+indent_style = space
+indent_size = 2
 
 [*.py]
-indent_style = space
 indent_size = 4
-
-[*.toml]
-indent_size = 2
-
-[*.yaml]
-indent_size = 2
-
-[*.md]
-indent_size = 2

@@ -1,6 +1,5 @@
 from rich import print
 from argparse import ArgumentParser, Namespace
-from client.user import ElsaClient
 
 
 def main(args: Namespace):
