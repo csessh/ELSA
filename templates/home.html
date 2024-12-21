@@ -1,17 +1,12 @@
-<button onclick="getScores()">Start simulation</button>
-<pre id="scoreboard"></pre>
+<body>
+    <pre id="scoreboard"></pre>
+</body>
 
 <script>
-    async function getScores() {
-        while(true) {
-            await fetch("/scores")
-            .then(res => res.json())
-            .then(data => {
-                var tag = document.getElementById("scoreboard")
-                tag.textContent = JSON.stringify(data, null, 2)
-            })
-
-            await new Promise(r => setTimeout(r, 100));
-        }
-    }
+    var ws = new WebSocket("ws://localhost:8000/scores");
+    ws.addEventListener("message", (event) => {
+        console.log(event.data)
+        var pre_tag = document.getElementById('scoreboard')
+        pre_tag.textContent = JSON.stringify(JSON.parse(event.data), null, 4)
+    })
 </script>
