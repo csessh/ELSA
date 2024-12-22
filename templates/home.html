@@ -1,12 +1,12 @@
 <body>
-    <pre id="scoreboard"></pre>
+    <pre id="leaderboard"></pre>
 </body>
 
 <script>
-    var ws = new WebSocket("ws://localhost:8000/scores");
+    var ws = new WebSocket("ws://localhost:8000/scoreboard");
     ws.addEventListener("message", (event) => {
         console.log(event.data)
-        var pre_tag = document.getElementById('scoreboard')
+        var pre_tag = document.getElementById('leaderboard')
         pre_tag.textContent = JSON.stringify(JSON.parse(event.data), null, 4)
     })
 </script>

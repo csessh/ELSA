@@ -6,4 +6,4 @@ COPY . /app
 WORKDIR /app
 RUN uv sync --frozen --no-cache
 
-CMD ["uv", "run", "fastapi", "run", "/app/services/scoreboard/main.py", "--port", "8000"]
+CMD ["uv", "run", "fastapi", "run", "/app/services/leaderboard/main.py", "--port", "8000"]

@@ -1,8 +1,8 @@
 services:
-  elsa-scoreboard:
+  leaderboard:
     build:
-      dockerfile: scoreboard.dockerfile 
-    container_name: scoreboard
+      dockerfile: services/leaderboard/Dockerfile
+    container_name: leaderboard
     ports:
       - 8000:8000
     network_mode: host
@@ -12,3 +12,11 @@ services:
     ports:
       - 6379:6379
     network_mode: host
+  nats:
+    image: nats:2.10.24
+    container_name: broker
+    network_mode: host
+    ports:
+      - 4222:4222
+      - 8222:8222
+    command: "-js -m 8222"
