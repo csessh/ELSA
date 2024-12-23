@@ -3,9 +3,10 @@
 </body>
 
 <script>
-    var ws = new WebSocket("ws://localhost:8000/scoreboard");
+    var url = window.location.href.split("/")
+    var qid = url[url.length-1]
+    var ws = new WebSocket("ws://localhost:8000/livescore/" + qid);
     ws.addEventListener("message", (event) => {
-        console.log(event.data)
         var pre_tag = document.getElementById('leaderboard')
         pre_tag.textContent = JSON.stringify(JSON.parse(event.data), null, 4)
     })

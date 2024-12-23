@@ -11,8 +11,8 @@ r = StrictRedis(connection_pool=ConnectionPool().from_url("redis://localhost:637
 def simulate():
     while True:
         for i in range(1, 20):
-            r.zincrby("quiz_uuid", value=f"player{i}", amount=random.randint(-10, 20))
-        time.sleep(5)
+            r.zincrby("quiz_1", value=f"player{i}", amount=random.randint(-10, 30))
+        time.sleep(3)
 
 
 def main(args: Namespace):
