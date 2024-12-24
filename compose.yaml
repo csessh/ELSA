@@ -1,4 +1,9 @@
 services:
+  quiz_sim:
+    build:
+      dockerfile: services/quiz/Dockerfile
+    container_name: simulation
+    network_mode: host
   leaderboard:
     build:
       dockerfile: services/leaderboard/Dockerfile

@@ -6,4 +6,5 @@ COPY . /app
 WORKDIR /app
 RUN uv sync --frozen --no-cache
 
-CMD ["uv", "run", "fastapi", "run", "/app/services/quiz/main.py", "--port", "9000"]
+CMD ["uv", "run", "services/quiz/main.py", "-name", "quiz_1", "-rounds", "30", "-players", "10"]
+
