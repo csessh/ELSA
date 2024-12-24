@@ -10,7 +10,8 @@ from nats.js import JetStreamContext
 from redis.asyncio import Redis as AsyncRedis
 from websockets.exceptions import ConnectionClosed
 
-from common.connections import WSConnectionManager
+from services.leaderboard.connection import WSConnectionManager
+
 
 ws_manager = WSConnectionManager()
 redis = AsyncRedis.from_url("redis://localhost:6379")

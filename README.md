@@ -1,48 +1,42 @@
 # ELSA
+
 ELSA SPEAK's coding challenge
 
 ## Introduction
 
-## Pre-requisite:
+## Technical demo
 
-The following tools are required:
+### Setup
 
-- Docker
-- Redis
-
-### Redis 
-
-This is a standard Redis installation. It can be done with either Docker or your favourite package manager (Brew, DNF, Snap...):
+Every components, simulation included, are packaged with `Docker`.
 
 ``` bash
-$ docker run -p 6379:6379 redis/redis-stack:latest
+docker compose build
+docker compose up -d # omit -d to trace logs
 ```
 
-or 
+### Leaderboard
 
-```bash
-$ sudo dnf install redis
-$ sudo systemctl start redis
-```
+The leaderboard is represented with JSON
 
-Once installed, validate with `redis-cli`:
+For example:
 
 ``` bash
-$ redis-cli ping
-PONG
+$ wscat -c ws://localhost:8000/livescore/quiz_1 
+
+Connected (press CTRL+C to quit)
+< [
+    {"PlayerID":"player1","Score":158.0,"Rank":1},
+    {"PlayerID":"player6","Score":155.0,"Rank":2},
+    {"PlayerID":"player8","Score":146.0,"Rank":3},
+    {"PlayerID":"player0","Score":146.0,"Rank":4},
+    {"PlayerID":"player2","Score":145.0,"Rank":5},
+    {"PlayerID":"player5","Score":140.0,"Rank":6},
+    {"PlayerID":"player7","Score":139.0,"Rank":7},
+    {"PlayerID":"player9","Score":137.0,"Rank":8},
+    {"PlayerID":"player3","Score":136.0,"Rank":9},
+    {"PlayerID":"player4","Score":118.0,"Rank":10}
+]
+...
 ```
 
-## Server 
-
-To get the server started, run the following command:
-
-``` bash
-$ docker compose up
-```
-
-`compose.yaml` defines two containers: `ElsaServer` and `Redis`
-
-`ElsaServer` is a FastAPI server exposed to port `8000` on `localhost`.
-`Redis` is mapped to `6379`.
-
-## Client simulation

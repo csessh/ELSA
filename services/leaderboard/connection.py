@@ -1,5 +1,4 @@
 from collections import defaultdict
-from redis.asyncio import Redis
 from typing import Any, Dict, List
 
 from fastapi import WebSocket
@@ -16,7 +15,7 @@ class Singleton(type):
 
 class WSConnectionManager(metaclass=Singleton):
     """
-    A simple websocket connection manager to keep track of active conntions.
+    A simple websocket connection manager to keep track of active connections
     """
 
     def __init__(self):
