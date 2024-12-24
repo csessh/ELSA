@@ -1,11 +1,7 @@
-<body>
-    <pre id="leaderboard"></pre>
-</body>
+<pre id="leaderboard"></pre>
 
 <script>
-    var url = window.location.href.split("/")
-    var qid = url[url.length-1]
-    var ws = new WebSocket("ws://localhost:8000/livescore/" + qid);
+    var ws = new WebSocket("ws://localhost:8000/livescore/{{ qid }}");
     ws.addEventListener("message", (event) => {
         var pre_tag = document.getElementById('leaderboard')
         pre_tag.textContent = JSON.stringify(JSON.parse(event.data), null, 4)
