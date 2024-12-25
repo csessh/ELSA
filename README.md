@@ -129,7 +129,7 @@ I made a number of assumptions to help guide the design of this system:
 - A player may drop out (or disconnect) from a quiz session at any time without losing their progress.
 - A player may resume a quiz session, although they would score 0 for missed quizzes.
 - The leaderboard can be viewed after the quiz has ended.
-- Leaderboards are quiz specific. Global leaderboard is discussed further in [Further consideration](<README#Further consideration>).
+- Leaderboards are quiz specific. Global leaderboard is discussed further in [Further consideration](<README#4-Further consideration>).
 
 ### 3.2-Message broker
 
@@ -201,7 +201,7 @@ This is where Redis comes in. Redis is widely used as a versatile and high-perfo
 
 `SortedSet` is a collection of unique strings ordered by an associated score. It perfectly aligns with what a ranking system like a leadboard requires.
 
-[Leaderboard service](<README#Global leaderboard>) and [Quiz service](<README#Quiz service>) both take advantage of this Redis to deliver livescore to users.
+[Leaderboard service](<README#3.5-Leaderboard service>) and [Quiz service](<README#3.4-Quiz service>) both take advantage of this Redis to deliver livescore to users.
 
 2/ I'd recommend a `NoSQL` database for the question banks.
 
@@ -231,7 +231,7 @@ Furthermore, static media files are regularly distributed to CDN edges to help r
 
 This service is responsible for creating and managing quiz sessions:
 
-- Request [Quiz-master service](<README#Quiz-master service>) for a set of quizzes.
+- Request [Quiz-master service](<README#3.6-Quiz-master service>) for a set of quizzes.
 - Connect user to a session given a unique session ID.
 - Update user scores as they progress through a quiz.
     - write to database
@@ -244,7 +244,7 @@ Server sends a question to all connecting users simultaneously, users receive an
 
 This service publishes messages to two topics:
 
-- `LEADERBOARD.>` to which [Leaderboard service](<README#Leaderboard service>) subscribes.
+- `LEADERBOARD.>` to which [Leaderboard service](<README#3.5-Leaderboard service>) subscribes.
 - `QUIZ.>` to which one of its own processes subscribts. 
 
 As user scores, this service saves the scores to `PostgreSQL` database AND update Redis cache. However, the process would be synchronised if they are done sequentially. It may not be suitable for a high load traffic requesting the latest updates. If we consider `eventual consistency` strategy, we can isolate the two processes and let them work independently by publishing the scores to `QUIZ.>` topic.
@@ -253,7 +253,7 @@ As demonstrated in the demo, I write to database in batches at the end of each r
 
 ### 3.5-Leaderboard service
 
-Similar to [Quiz service](<README#Quiz service>), WebSocket communication is also preferred here as it is persistent, bidirectional.
+Similar to [Quiz service](<README#3.4-Quiz service>), WebSocket communication is also preferred here as it is persistent, bidirectional.
 
 This service listens to `LEADERBOARD.*` topic to trigger cache read when a message comes through.
 
@@ -312,7 +312,7 @@ Furthermore, other services, like HashiCorp Vault, may be required to handle sec
 
 ### 4.3-Others
 
-- What if Redis experiences `thundering herd` problem?
+- Could our Redis experience `thundering herd` problem in this design? If so, how to mitigate?
 - What caching strategies should we use? and what do we cache, apart from user scores?
 
 I am happy to discuss this system further. Let's talk.
