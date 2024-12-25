@@ -4,20 +4,20 @@ ELSA SPEAK's coding challenge
 
 - [Introduction](#1-Introduction)
 - [Technical demo](<#2-Technical demo>)
-  - [Setup](2.1-Setup)
-  - [Leaderboard](2.2-Leaderboard)
-  - [Quiz simulation](<2.3-Quiz simulation>)
-- [System Design](<3-System design>)
-  - [Assumptions](3.1-Assumptions)
-  - [Message broker](<3.2-Message broker>)
-  - [Database](3.3-Database)
-  - [Quiz service](<3.4-Quiz service>)
-  - [Leaderboard service](<3.5-Leaderboard service>)
-  - [Quiz master service](<3.6-Quiz-master service>)
-- [Further consideration](<4-Further consideration>)
-  - [Global leaderboard](<4.1-Global leaderboard>)
-  - [Security](4.2-Security)
-  - [Others](4.3-Others)
+  - [Setup](#2.1-Setup)
+  - [Leaderboard](#2.2-Leaderboard)
+  - [Quiz simulation](<#2.3-Quiz simulation>)
+- [System Design](<#3-System design>)
+  - [Assumptions](#3.1-Assumptions)
+  - [Message broker](<#3.2-Message broker>)
+  - [Database](#3.3-Database)
+  - [Quiz service](<#3.4-Quiz service>)
+  - [Leaderboard service](<#3.5-Leaderboard service>)
+  - [Quiz master service](<#3.6-Quiz-master service>)
+- [Further consideration](<#4-Further consideration>)
+  - [Global leaderboard](<#4.1-Global leaderboard>)
+  - [Security](#4.2-Security)
+  - [Others](#4.3-Others)
 
 ## 1-Introduction
 
@@ -129,7 +129,7 @@ I made a number of assumptions to help guide the design of this system:
 - A player may drop out (or disconnect) from a quiz session at any time without losing their progress.
 - A player may resume a quiz session, although they would score 0 for missed quizzes.
 - The leaderboard can be viewed after the quiz has ended.
-- Leaderboards are quiz specific. Global leaderboard is discussed further in [Further consideration](<4-Further consideration>).
+- Leaderboards are quiz specific. Global leaderboard is discussed further in [Further consideration](<#4-Further consideration>).
 
 ### 3.2-Message broker
 
@@ -201,7 +201,7 @@ This is where Redis comes in. Redis is widely used as a versatile and high-perfo
 
 `SortedSet` is a collection of unique strings ordered by an associated score. It perfectly aligns with what a ranking system like a leadboard requires.
 
-[Leaderboard service](<3.5-Leaderboard service>) and [Quiz service](<3.4-Quiz service>) both take advantage of this Redis to deliver livescore to users.
+[Leaderboard service](<#3.5-Leaderboard service>) and [Quiz service](<#3.4-Quiz service>) both take advantage of this Redis to deliver livescore to users.
 
 2/ I'd recommend a `NoSQL` database for the question banks.
 
@@ -231,7 +231,7 @@ Furthermore, static media files are regularly distributed to CDN edges to help r
 
 This service is responsible for creating and managing quiz sessions:
 
-- Request [Quiz-master service](<3.6-Quiz-master service>) for a set of quizzes.
+- Request [Quiz-master service](<#3.6-Quiz-master service>) for a set of quizzes.
 - Connect user to a session given a unique session ID.
 - Update user scores as they progress through a quiz.
     - write to database
@@ -244,7 +244,7 @@ Server sends a question to all connecting users simultaneously, users receive an
 
 This service publishes messages to two topics:
 
-- `LEADERBOARD.>` to which [Leaderboard service](<3.5-Leaderboard service>) subscribes.
+- `LEADERBOARD.>` to which [Leaderboard service](<#3.5-Leaderboard service>) subscribes.
 - `QUIZ.>` to which one of its own processes subscribts. 
 
 As user scores, this service saves the scores to `PostgreSQL` database AND update Redis cache. However, the process would be synchronised if they are done sequentially. It may not be suitable for a high load traffic requesting the latest updates. If we consider `eventual consistency` strategy, we can isolate the two processes and let them work independently by publishing the scores to `QUIZ.>` topic.
@@ -253,7 +253,7 @@ As demonstrated in the demo, I write to database in batches at the end of each r
 
 ### 3.5-Leaderboard service
 
-Similar to [Quiz service](<3.4-Quiz service>), WebSocket communication is also preferred here as it is persistent, bidirectional.
+Similar to [Quiz service](<#3.4-Quiz service>), WebSocket communication is also preferred here as it is persistent, bidirectional.
 
 This service listens to `LEADERBOARD.*` topic to trigger cache read when a message comes through.
 
