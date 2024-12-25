@@ -1,9 +1,47 @@
-<pre id="leaderboard"></pre>
+<style>
+    table {
+        border: 3px solid #666;
+        margin-left: auto;
+        margin-right: auto;
+        width: 60%;
+    }
+    th {
+        background: #4dc45b;
+        font-weight: bold;
+        padding: 3px;
+    }
+</style>
 
+<table id="leaderboard">
+</table>
+
+<script src="jquery.simple.websocket.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     var ws = new WebSocket("ws://localhost:8000/livescore/{{ qid }}");
-    ws.addEventListener("message", (event) => {
-        var pre_tag = document.getElementById('leaderboard')
-        pre_tag.textContent = JSON.stringify(JSON.parse(event.data), null, 4)
-    })
+    ws.onmessage = function(event) {
+        data = JSON.parse(event.data);
+        $('#leaderboard').empty();
+        drawTableHead();
+        drawTableRows(data);
+    };
+
+    function drawTableHead() {
+        var row = $("<tr />");
+        $("#leaderboard").append(row);
+        row.append("<th>" + "Rank"  + "</th>");
+        row.append("<th>" + "PlayerID"  + "</th>");
+        row.append("<th>" + "Score"  + "</th>");
+    }
+
+    function drawTableRows(data) {
+        for (var i = 0; i < data.length; i++) {
+            var row = $("<tr />");
+            $("#leaderboard").append(row);
+            row.append("<td>" + data[i].Rank  + "</td>");
+            row.append("<td>" + data[i].PlayerID  + "</td>");
+            row.append("<td>" + data[i].Score  + "</td>");
+        }
+    }
+
 </script>
