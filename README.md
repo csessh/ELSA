@@ -2,12 +2,13 @@
 
 ELSA SPEAK's coding challenge
 
-[Introduction](README#Introduction)
-[Technical demo](<README#Technical demo>)
-  - [Setup](README#Setup)
-  - [Leaderboard](README#Leaderboard)
+[Introduction](README#1-Introduction)
+[Technical demo](<README#2-Technical demo>)
+  - [Setup](README#2.1-Setup)
+  - [Leaderboard](README#2.2-Leaderboard)
+  - [Quiz simulation](<README#2.3-Quiz simulation>)
 
-## Introduction
+## 1-Introduction
 
 In this repo, you'll find:
 
@@ -15,12 +16,12 @@ In this repo, you'll find:
 - a working demo for the live update leaderboard written in Python. 
 - an instruction to run the demo.
 
-## Technical demo
+## 2-Technical demo
 
 In this demo, I've chosen to focus on the `real-time leaderboard` component. 
 The score updates and user participation are mocked with a simulation.
 
-### Setup
+### 2.1-Setup
 
 To run this demo, execute the following commands in your terminal:
 
@@ -58,12 +59,12 @@ It's worth noting that:
 - Nothing is persisted to disc.
 - These containers operate in `host` network mode.
 - They take up the following ports:
-    - 8000 (Leaderboard service)
-    - 4222 (Nats server)
-    - 8222 (Nats monitoring)
-    - 6379 (Redis)
+    - `8000` (Leaderboard service)
+    - `4222` (Nats server)
+    - `8222` (Nats monitoring)
+    - `6379` (Redis)
 
-### Leaderboard
+### 2.2-Leaderboard
 
 The leaderboard is accessible via `localhost:8000/lovescore/{quiz_name}`.
 
@@ -93,7 +94,7 @@ Connected (press CTRL+C to quit)
 ...
 ```
 
-### Quiz simulation
+### 2.3-Quiz simulation
 
 The simulation takes in the following arguments:
 
@@ -103,11 +104,11 @@ The simulation takes in the following arguments:
 
 Every round, a random score value is assigned to each player and they are reflected on the leaderboard.
 
-## System design
+## 3-System design
 
 ![image](./docs/high_level_design_diagram.png)
 
-### Assumptions
+### 3.1-Assumptions
 
 I made a number of assumptions to help guide the design of this system:
 
@@ -119,9 +120,7 @@ I made a number of assumptions to help guide the design of this system:
 - The leaderboard can be viewed after the quiz has ended.
 - Leaderboards are quiz specific. Global leaderboard is discussed further in [Further consideration](<README#Further consideration>).
 
-### Components
-
-#### Message broker
+### 3.2-Message broker
 
 A message broker, like [Kafka](https://kafka.apache.org/) or [Nats](https://nats.io/) or [RabbitMQ](https://www.rabbitmq.com/), is incredibly useful in event-driven architectures.
 
@@ -133,15 +132,13 @@ We declare two topics:
 - `QUIZ.>`
 - `LEADERBOARD.>`
 
-For example:
+`QUIZ.>` topic messages contain user score change data. For example: `QUIZ.quiz_1.1.someusername: 20`.
+Subscribers to this topic are tasked with writing these information to database.
 
-``` python
-await js.publish(subject=f"QUIZ.{args.name}.{round}.player{i}", payload=str(score).encode())
-```
+`LEADERBOARD.>` topic messages contain quiz session unique ID. For example: `LEADERBOARD.quiz_1`.
+Subscribers to this topic use these messages as an flag to trigger an event.
 
-
-
-#### Database and cache
+### 3.3-Database
 
 Throughout our system, there are several databases. Each with a different purpose:
 
@@ -219,7 +216,7 @@ it's flexible and there is no need to define any rigid data modelling for them.
 
 Furthermore, static media files are regularly distributed to CDN edges to help reduce latency in our system.
 
-#### Quiz service
+### 3.4-Quiz service
 
 This service is responsible for creating and managing quiz sessions:
 
@@ -243,33 +240,34 @@ As user scores, this service saves the scores to `PostgreSQL` database AND updat
 
 As demonstrated in the demo, I write to database in batches at the end of each round when everyone has scored to avoid flooding the database.
 
-#### Leaderboard service
+### 3.5-Leaderboard service
 
 Similar to [Quiz service](<README#Quiz service>), WebSocket communication is also preferred here as it is persistent, bidirectional.
 
-This service listens to `LEADERBOARD.*` topic on Nats server and trigger cache read when a message comes through.
+This service listens to `LEADERBOARD.*` topic to trigger cache read when a message comes through.
 
-A message on this subject contains the unique session ID so that we can query Redis for the relevant scores AND broadcast updated data to relevant users.
+A message on this subject contains the unique session ID so that we can query Redis for the relevant scores AND broadcast updated data to relevant users. Without a trigger event like so, this service would constantly send requests to Redis. It would be extremely unnecessary.
 
-#### Quiz-master service
+### 3.6-Quiz-master service
 
 We want to be able to allow our users, perhaps privileged, to populate the system question banks.
 
 This service also allows user to upload media files along with their quizzes.
 These files are stored in a blob storage. Their location in blob storage are referenced in one of the fields in quiz data.
 
-Without a trigger event like so, this service would constantly send requests to Redis. It would be extremely unnecessary.
+## 4-Further consideration
 
-### Further consideration
+Here are some of my thoughts on further developing this system.
+However, I did not have the capacity to dive deeper into these topics at the moment due to other commitments.
 
-#### Global leaderboard
+### 4.1-Global leaderboard
 
 It makes sense to have a global leaderboard to encourage users's participation in future quiz sessions.
 Perhaps, a set number of points are awarded to the top 5 players in each individual quiz session. These points are tallied in global leaderboard.
 
 This global leaderboard probably won't need to be real-time and it can be designed with eventual consistency in mind.
 
-#### Security
+### 4.2-Security
 
 In the current design, the focus lies primarily within the "real-time communication" aspect of the system.
 
@@ -301,7 +299,9 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_toke
 
 Furthermore, other services, like HashiCorp Vault, may be required to handle secrets and certificates.
 
-#### Redundancy
+### 4.3-Others
 
+- What if Redis experiences `thundering herd` problem?
+- What caching strategies should we use? and what do we cache, apart from user scores?
 
-## Happy holidays
+I am happy to discuss this system further. Let's talk.
