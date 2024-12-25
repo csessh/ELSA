@@ -119,16 +119,6 @@ I made a number of assumptions to help guide the design of this system:
 - The leaderboard can be viewed after the quiz has ended.
 - Leaderboards are quiz specific. Global leaderboard is discussed further in [Further consideration](<README#Further consideration>).
 
-Let's review some of the requirements and non-functional requirements.
-
-Requirements:
-
- - 
-
-Non-functional requirements:
-
- - 
-
 ### Components
 
 #### Message broker
@@ -142,6 +132,14 @@ We declare two topics:
 
 - `QUIZ.>`
 - `LEADERBOARD.>`
+
+For example:
+
+``` python
+await js.publish(subject=f"QUIZ.{args.name}.{round}.player{i}", payload=str(score).encode())
+```
+
+
 
 #### Database and cache
 
@@ -197,20 +195,19 @@ This is where Redis comes in. Redis is widely used as a versatile and high-perfo
 
 [Leaderboard service](<README#Global leaderboard>) and [Quiz service](<README#Quiz service>) both take advantage of this Redis to deliver livescore to users.
 
-
 2/ I'd recommend a `NoSQL` database for the question banks.
 
 Perhaps something along this line:
 
 ``` json
 {
-	title: "Quiz title",
-	tags: ["news", "events"],
-    questions: [
+    "title": "Quiz title",
+    "tags": ["news", "events"],
+    "questions": [
         {
             "question": "1+1=?",
             "answer": "2",
-            media: ["blob storage reference goes here"],
+            "media": ["blob storage reference goes here"],
         }, 
     ],
 }
@@ -226,16 +223,42 @@ Furthermore, static media files are regularly distributed to CDN edges to help r
 
 This service is responsible for creating and managing quiz sessions:
 
-- Generate a unique ID for each session
-- Update user scores as they progress through a session
-- Write quiz scores to database
+- Request [Quiz-master service](<README#Quiz-master service>) for a set of quizzes.
+- Connect user to a session given a unique session ID.
+- Update user scores as they progress through a quiz.
+    - write to database
+    - update cache
+- Publish message to the message broker to let Leaderboard service know to broadcast new leaderboard data to its connection.
+
+This service provides a websocket endpoint to allow for a durable and real-time communication. 
+I imagine a quiz session could potentially look quite similar to a messaging application.
+Server sends a question to all connecting users simultaneously, users receive and answers without having to refresh to resend a request to our server.
+
+This service publishes messages to two topics:
+
+- `LEADERBOARD.>` to which [Leaderboard service](<README#Leaderboard service>) subscribes.
+- `QUIZ.>` to which one of its own processes subscribts. 
+
+As user scores, this service saves the scores to `PostgreSQL` database AND update Redis cache. However, the process would be synchronised if they are done sequentially. It may not be suitable for a high load traffic requesting the latest updates. If we consider `eventual consistency` strategy, we can isolate the two processes and let them work independently by publishing the scores to `QUIZ.>` topic.
+
+As demonstrated in the demo, I write to database in batches at the end of each round when everyone has scored to avoid flooding the database.
 
 #### Leaderboard service
 
+Similar to [Quiz service](<README#Quiz service>), WebSocket communication is also preferred here as it is persistent, bidirectional.
+
+This service listens to `LEADERBOARD.*` topic on Nats server and trigger cache read when a message comes through.
+
+A message on this subject contains the unique session ID so that we can query Redis for the relevant scores AND broadcast updated data to relevant users.
+
 #### Quiz-master service
 
-### Workflows
+We want to be able to allow our users, perhaps privileged, to populate the system question banks.
 
+This service also allows user to upload media files along with their quizzes.
+These files are stored in a blob storage. Their location in blob storage are referenced in one of the fields in quiz data.
+
+Without a trigger event like so, this service would constantly send requests to Redis. It would be extremely unnecessary.
 
 ### Further consideration
 
@@ -277,5 +300,8 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_toke
 ```
 
 Furthermore, other services, like HashiCorp Vault, may be required to handle secrets and certificates.
+
+#### Redundancy
+
 
 ## Happy holidays
