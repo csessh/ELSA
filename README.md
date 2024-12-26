@@ -26,6 +26,7 @@ In this repo, you'll find:
 - a high level design breakdown for a real-time quiz feature for an English learning application.
 - a working demo for the live update leaderboard written in Python. 
 - an instruction to run the demo.
+- a [video recording](https://github.com/csessh/ELSA/blob/main/docs/submission.mp4) to go over the solution and the demo.
 
 ## 2-Technical demo
 
